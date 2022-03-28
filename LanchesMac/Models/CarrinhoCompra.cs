@@ -13,18 +13,18 @@ namespace LanchesMac.Models
         }
 
         public String CarrinhoCompraId { get; set; }
-        public List<CarrinhoCompraItem> CarrinhoCompraItens { get; set; }
+        public List<CarrinhoCompraItem> CarrinhoCompraItems { get; set; }
 
         public static CarrinhoCompra GetCarrinho(IServiceProvider services)
         {
-            //define uma sessão
+            //define uma sessão                         //operador elvis =>  avalia expressão sendo diferente de null, realiza operação
             ISession session = services.GetRequiredService<IHttpContextAccessor>()?.HttpContext.Session;
 
             //obtem um serviço do tipo do nosso contexto
             var context = services.GetService<AppDbContext>();
 
-            //obtem ou gera o Id do carrinho
-            string carrinhoId = session.GetString("carrinhoId") ?? Guid.NewGuid().ToString();
+            //obtem ou gera o Id do carrinho        //coalesenca nula => avalia expressão sendo diferente de null, retorna o valor capturado, caso contrario realiza operação
+            string carrinhoId = session.GetString("CarrinhoId") ?? Guid.NewGuid().ToString();
 
             //atribui o id do carrinho na sessão
             session.SetString("CarrinhoId", carrinhoId);
@@ -68,7 +68,7 @@ namespace LanchesMac.Models
 
             var quantidadeLocal = 0;
 
-            if (carrinhoCompraItem == null)
+            if (carrinhoCompraItem != null)
             {
                 if (carrinhoCompraItem.Quantidade > 1)
                 {
@@ -86,8 +86,9 @@ namespace LanchesMac.Models
 
         public List<CarrinhoCompraItem> GetCarrinhoCompraItens()
         {
-            return CarrinhoCompraItens ??
-                    (CarrinhoCompraItens =
+            //coalesenca nula => avalia expressão sendo diferente de null, retorna o valor capturado, caso contrario realiza operação
+            return CarrinhoCompraItems ??
+                    (CarrinhoCompraItems =
                         _context.CarrinhoCompraItens
                         .Where(c => c.CarrinhoCompraId == CarrinhoCompraId)
                         .Include(s => s.Lanche)

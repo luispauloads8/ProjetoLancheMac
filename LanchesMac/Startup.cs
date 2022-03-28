@@ -25,6 +25,8 @@ public class Startup
         //configuração de repository por DI, injeção de dependência
         services.AddTransient<ILancheRepository, LancheRepository>();
         services.AddTransient<ICategoriaRepository, CategoriaRepository>();
+        services.AddTransient<IPedidoRepository, PedidoRepository>();
+
         services.AddScoped(sp => CarrinhoCompra.GetCarrinho(sp));
 
         //service do IHttpContextAccessor
@@ -62,6 +64,11 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+        endpoints.MapControllerRoute(
+            name: "categoriaFiltro",
+            pattern: "Lanche/{action}/{categoria?}",
+            defaults: new { controller = "Lanche", action = "List" });
+           
             endpoints.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
