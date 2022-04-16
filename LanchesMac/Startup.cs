@@ -2,6 +2,7 @@
 using LanchesMac.Models;
 using LanchesMac.Repositories;
 using LanchesMac.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace LanchesMac;
@@ -21,6 +22,22 @@ public class Startup
         //registrando string de conexão com banco de dados, com provedor SqlServer
         services.AddDbContext<AppDbContext>(options =>
               options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+        //serviço para gerenciar usuário e perfil, recuperar informações do contexto
+        services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+        //services.Configure<IdentityOptions>(options =>
+        //{
+        //    //Default Password settings.
+        //    options.Password.RequireDigit = false;
+        //    options.Password.RequireLowercase = false;
+        //    options.Password.RequireNonAlphanumeric = false;
+        //    options.Password.RequireUppercase = false;
+        //    options.Password.RequiredLength = 3;
+        //    options.Password.RequiredUniqueChars = 1;
+        //});
 
         //configuração de repository por DI, injeção de dependência
         services.AddTransient<ILancheRepository, LancheRepository>();
@@ -60,15 +77,16 @@ public class Startup
         //habilitando sessão middleware
         app.UseSession();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.UseEndpoints(endpoints =>
         {
-        endpoints.MapControllerRoute(
-            name: "categoriaFiltro",
-            pattern: "Lanche/{action}/{categoria?}",
-            defaults: new { controller = "Lanche", action = "List" });
-           
+            endpoints.MapControllerRoute(
+                name: "categoriaFiltro",
+                pattern: "Lanche/{action}/{categoria?}",
+                defaults: new { controller = "Lanche", action = "List" });
+
             endpoints.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
